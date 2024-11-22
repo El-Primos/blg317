@@ -1,0 +1,4 @@
+SELECT *
+FROM games
+ORDER BY date DESC
+LIMIT 10;

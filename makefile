@@ -1,20 +1,21 @@
 # Variables
-NEXT_DIR=React
-FLASK_DIR=src/backend
+NEXT_DIR=frontend
+FLASK_DIR=backend
 
 # Commands
 .PHONY: build next flask start_all stop_all
 
-#npm i
+# Install dependencies for both frontend and backend
 build:
 	cd $(NEXT_DIR) && npm i
+	cd $(FLASK_DIR) && pip install -r requirements.txt
 # Run Next.js
 next:
 	cd $(NEXT_DIR) && npm run dev
 
 # Run Flask API
 flask:
-	cd $(FLASK_DIR) && python app.py
+	cd $(FLASK_DIR) && python run.py
 
 # Start both (parallel)
 startall:
