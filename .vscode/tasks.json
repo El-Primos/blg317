@@ -1,0 +1,144 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Frontend (Next.js)",
+            "type": "shell",
+            "command": "npm install",
+            "options": {
+              "cwd": "${workspaceFolder}/frontend"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Backend (Flask)",
+            "type": "shell",
+            "command": "pip install -r requirements.txt",
+            "options": {
+              "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build All",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Build Frontend (Next.js)", "Build Backend (Flask)"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Frontend (Next.js)",
+            "type": "shell",
+            "command": "npm run dev",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Run Backend (Flask)",
+            "type": "shell",
+            "command": "python run.py",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Run Both Servers",
+            "dependsOn": [
+                "Run Frontend (Next.js)",
+                "Run Backend (Flask)"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        }
+    ]
+}
+
+
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Install Frontend Dependencies",
+        "type": "shell",
+        "command": "npm install",
+        "options": {
+          "cwd": "${workspaceFolder}/frontend"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Install Backend Dependencies",
+        "type": "shell",
+        "command": "pip install -r requirements.txt",
+        "options": {
+          "cwd": "${workspaceFolder}/backend"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Build All",
+        "type": "shell",
+        "dependsOrder": "sequence",
+        "dependsOn": ["Install Frontend Dependencies", "Install Backend Dependencies"],
+        "problemMatcher": []
+      },
+      {
+        "label": "Run Frontend (Next.js)",
+        "type": "shell",
+        "command": "npm run dev",
+        "options": {
+          "cwd": "${workspaceFolder}/frontend"
+        },
+        "group": {
+          "kind": "test",
+          "isDefault": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run Backend (Flask)",
+        "type": "shell",
+        "command": "python run.py",
+        "options": {
+          "cwd": "${workspaceFolder}/backend"
+        },
+        "group": {
+          "kind": "test",
+          "isDefault": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Start All",
+        "type": "shell",
+        "dependsOrder": "parallel",
+        "dependsOn": ["Run Frontend (Next.js)", "Run Backend (Flask)"],
+        "problemMatcher": []
+      },
+      {
+        "label": "Stop All",
+        "type": "shell",
+        "command": "pkill -f 'npm run dev' || true && pkill -f 'python run.py' || true",
+        "problemMatcher": []
+      }
+    ]
+  }
+  
