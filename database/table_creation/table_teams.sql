@@ -106,3 +106,7 @@ WHERE EXISTS (
 );
 
 DROP TABLE nba_team_flags;
+
+UPDATE teams
+SET logo_url = "https://1000logos.net/wp-content/uploads/2018/06/logo-Denver-Nuggets.png"
+WHERE team_id = 1610612743;
