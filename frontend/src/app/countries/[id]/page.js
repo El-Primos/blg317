@@ -7,8 +7,11 @@ import { InputText } from 'primereact/inputtext';
 import { TabMenu } from 'primereact/tabmenu';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Calendar } from 'primereact/calendar';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { useRouter } from 'next/navigation';
 import classNames from 'classnames';
+import lazyLoad from '@/lib/lazyLoadFilters';
 
 export default function Page({ params }) {
     const router = useRouter();
@@ -22,6 +25,8 @@ export default function Page({ params }) {
     const [totalRecords, setTotalRecords] = useState(0);
 
     const [data, setData] = useState([]);
+    const [filters, setFilters] = useState(null);
+    const [lazyFilters, setLazyFilters] = useState(null);
 
     const items = [
         { label: 'Teams', icon: <img src="/default_team.png" className="mr-2" style={{ width: 24, height: 24 }} /> },
@@ -38,7 +43,15 @@ export default function Page({ params }) {
         if (activeIndex == 0) request += 'teams';
         else if (activeIndex == 1) request += 'players';
 
-        fetch(`${request}?page=${currentPage}&limit=${limit}`)
+        const queries = lazyFilters ? lazyLoad(lazyFilters) : {};
+
+        fetch(`${request}?page=${currentPage}&limit=${limit}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...queries }),
+        })
             .then((response) => response.json())
             .then((data) => {
                 if (activeIndex == 0) {
@@ -50,15 +63,153 @@ export default function Page({ params }) {
                 }
             })
             .catch((error) => console.log(error));
-    }, [activeIndex, currentPage, limit]);
+    }, [activeIndex, currentPage, limit, lazyFilters]);
 
-    const instagramTemplate = (options) => {
+    useEffect(() => {
+        initFilters();
+    }, [activeIndex]);
+
+    const initFilters = () => {
+        if (activeIndex === 0) {
+            setFilters({
+                name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                owner: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                general_manager: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                headcoach: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                city_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                arena_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                year_founded: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                },
+            });
+            setLazyFilters({
+                name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                owner: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                general_manager: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                headcoach: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                city_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                arena_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                year_founded: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                    type: 'Integer',
+                },
+            });
+        } else if (activeIndex === 1) {
+            setFilters({
+                first_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                last_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+                height: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                },
+                weight: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                },
+                birth_date: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+                },
+                college: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                },
+            });
+            setLazyFilters({
+                first_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                last_name: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+                height: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                    type: 'Integer',
+                },
+                weight: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+                    type: 'Integer',
+                },
+                birth_date: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+                    type: 'Date',
+                },
+                college: {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                    type: 'String',
+                },
+            });
+        }
+    };
+
+    const clearFilter = () => {
+        initFilters();
+    };
+
+    const renderHeader = () => {
         return (
-            <i
-                className="fa-brands fa-instagram"
-                style={{ cursor: 'pointer' }}
-                onClick={() => window.open(options.instagram, '_blank')}
-            ></i>
+            <div className="flex justify-content-between">
+                <TabMenu model={items} activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)} />
+                <Button className="mr-6" icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter} />
+            </div>
         );
     };
 
@@ -163,6 +314,22 @@ export default function Page({ params }) {
         },
     };
 
+    const dateFilterTemplate = (options) => {
+        return (
+            <Calendar
+                value={options.value}
+                onChange={(e) => options.filterCallback(e.value, options.index)}
+                dateFormat="dd/mm/yy"
+                placeholder="dd/mm/yyyy"
+                mask="99/99/9999"
+            />
+        );
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString();
+    };
+
     const onPageInputKeyDown = (event, options) => {
         if (event.key === 'Enter') {
             const page = parseInt(reportPage);
@@ -176,14 +343,29 @@ export default function Page({ params }) {
         }
     };
 
+    const onFilter = (e) => {
+        const _filters = e.filters;
+        setFilters(_filters);
+        setLazyFilters(
+            Object.keys(_filters).reduce((acc, filterKey) => {
+                const lazyFilterValue = lazyFilters[filterKey] || {};
+                acc[filterKey] = {
+                    ..._filters[filterKey],
+                    type: lazyFilterValue?.type,
+                };
+                return acc;
+            }, {}),
+        );
+    };
+
     const dataTable = {
         0: (
             <DataTable
-                header={
-                    <TabMenu model={items} activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)} />
-                }
+                header={renderHeader}
                 className="datatable"
                 value={data}
+                filters={filters}
+                onFilter={(e) => onFilter(e)}
                 lazy
                 paginator
                 paginatorTemplate={dataTablePaginatorTamplate}
@@ -199,27 +381,27 @@ export default function Page({ params }) {
                     setCurrentPage(e.page + 1);
                 }}
                 size="small"
+                scrollable
                 scrollHeight="60vh"
                 stripedRows
             >
-                <Column field="team_id" header="ID"></Column>
-                <Column field="name" header="Name"></Column>
-                <Column field="owner" header="Owner"></Column>
-                <Column field="general_manager" header="General Manager"></Column>
-                <Column field="headcoach" header="Headcoach"></Column>
-                <Column field="city_name" header="City"></Column>
-                <Column field="arena_name" header="Arena"></Column>
-                <Column field="year_founded" header="Year Founded"></Column>
-                <Column field="instagram" header="Instagram" body={instagramTemplate}></Column>
+                <Column field="team_id" header="#"></Column>
+                <Column field="name" filter header="Name"></Column>
+                <Column field="owner" filter header="Owner"></Column>
+                <Column field="general_manager" filter header="General Manager"></Column>
+                <Column field="headcoach" filter header="Headcoach"></Column>
+                <Column field="city_name" filter header="City"></Column>
+                <Column field="arena_name" filter header="Arena"></Column>
+                <Column field="year_founded" filter dataType="numeric" header="Year Founded"></Column>
             </DataTable>
         ),
         1: (
             <DataTable
-                header={
-                    <TabMenu model={items} activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)} />
-                }
+                header={renderHeader}
                 className="datatable"
                 value={data}
+                filters={filters}
+                onFilter={(e) => onFilter(e)}
                 lazy
                 paginator
                 paginatorTemplate={dataTablePaginatorTamplate}
@@ -235,16 +417,24 @@ export default function Page({ params }) {
                     setCurrentPage(e.page + 1);
                 }}
                 size="small"
+                scrollable
                 scrollHeight="60vh"
                 stripedRows
             >
-                <Column field="player_id" header="ID"></Column>
-                <Column field="first_name" header="First Name"></Column>
-                <Column field="last_name" header="Last Name"></Column>
-                <Column field="height" header="Height (inch)"></Column>
-                <Column field="weight" header="Weight (pound)"></Column>
-                <Column field="birth_date" header="Birth Date"></Column>
-                <Column field="college" header="College"></Column>
+                <Column field="player_id" header="#"></Column>
+                <Column field="first_name" filter header="First Name"></Column>
+                <Column field="last_name" filter header="Last Name"></Column>
+                <Column field="height" filter dataType="numeric" header="Height (inch)"></Column>
+                <Column field="weight" filter dataType="numeric" header="Weight (pound)"></Column>
+                <Column
+                    field="birth_date"
+                    filter
+                    dataType="date"
+                    body={(rowData) => formatDate(rowData.birth_date)}
+                    filterElement={dateFilterTemplate}
+                    header="Birth Date"
+                ></Column>
+                <Column field="college" filter header="College"></Column>
             </DataTable>
         ),
     }[activeIndex];
@@ -280,7 +470,7 @@ export default function Page({ params }) {
                     </div>
                 </div>
             </div>
-            <div className="datatable-wrapper">{dataTable}</div>
+            <div className="datatable-wrapper mt-7">{dataTable}</div>
         </div>
     );
 }

@@ -204,12 +204,20 @@ def getLastGames_api():
 
     return jsonify(formatted_games)
 
-@api_bp.route('/country/<int:country_id>/players', methods=['GET'])
+@api_bp.route('/country/<int:country_id>/players', methods=['POST'])
 def countryPlayers_api(country_id):
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
 
-    table, total_countryPlayers = get_countryPlayers(country_id, page, limit)
+    query = request.get_json();
+    query['country_id'] = {
+        "operator": "and",
+        "constraints": [
+            {"value": f"{country_id}", "mode": "="}
+        ]
+    }
+
+    table, total_countryPlayers = get_countryPlayers(query, page, limit)
 
     return jsonify({
         'counrtyPlayers': [{'player_id': row[0], 'first_name': row[1], 'last_name': row[2], 'height': row[3], 'weight': row[4], 'birth_date': row[5], 'college': row[6]} for row in table],
@@ -217,12 +225,24 @@ def countryPlayers_api(country_id):
         'totalCountryPlayers': total_countryPlayers
     })
 
-@api_bp.route('/country/<int:country_id>/teams', methods=['GET'])
+@api_bp.route('/country/<int:country_id>/teams', methods=['POST'])
 def countryTeams_api(country_id):
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
 
-    table, total_countryTeams = get_countryTeams(country_id, page, limit)
+    query = request.args.to_dict(flat=False)
+    query.pop("page")
+    query.pop("limit")
+
+    query = request.get_json();
+    query['country_id'] = {
+        "operator": "and",
+        "constraints": [
+            {"value": f"{country_id}", "mode": "="}
+        ]
+    }
+
+    table, total_countryTeams = get_countryTeams(query, page, limit)
 
     return jsonify({
         'counrtyTeams': [{'team_id': row[0], 'name': row[1], 'owner': row[2], 'general_manager': row[3], 'headcoach': row[4], 'city_name': row[5], 'arena_name': row[6], 'year_founded': row[7]} for row in table],

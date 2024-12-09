@@ -338,26 +338,26 @@ def get_countryPlayers(query, page=1, per_page=24):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    sql_query = """
+    sql_query = f"""
         SELECT p.player_id, p.first_name, p.last_name, p.height, p.weight, p.birth_date, p.college 
         FROM players p
         NATURAL JOIN countries c
-        WHERE c.country_id = ?
+        {query_to_sql(query)}
         LIMIT ? OFFSET ?
     """
-    params = (query, per_page, (page - 1) * per_page)
+    params = (per_page, (page - 1) * per_page)
 
     cursor.execute(sql_query, params)
     country_players = cursor.fetchall()
 
-    sql_query = """
+    sql_query = f"""
         SELECT COUNT(*)
         FROM players p
         NATURAL JOIN countries c
-        WHERE c.country_id = ?
+        {query_to_sql(query)}
     """
 
-    cursor.execute(sql_query, (query,))
+    cursor.execute(sql_query)
     total_count = cursor.fetchone()[0]
 
     return country_players, total_count
@@ -366,32 +366,35 @@ def get_countryTeams(query, page=1, per_page=24):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    sql_query = """
-        SELECT t.team_id, t.nickname as name, t.owner, t.general_manager, t.headcoach, c.name as city_name, a.name as arena_name, t.year_founded, t.instagram
+    if 'name' in query:
+        query['t.name'] = query.pop('name')
+
+    sql_query = f"""
+        SELECT t.team_id, t.name, t.owner, t.general_manager, t.headcoach, c.name as city_name, a.name as arena_name, t.year_founded
         FROM teams t
         JOIN arenas a ON t.arena_id = a.arena_id
         JOIN cities c ON t.city_id = c.city_id
         JOIN states s ON c.state_id = s.state_id
         JOIN countries cout ON s.country_id = cout.country_id
-        WHERE cout.country_id = ?
+        {query_to_sql(query)}
         LIMIT ? OFFSET ?
     """
-    params = (query, per_page, (page - 1) * per_page)
+    params = (per_page, (page - 1) * per_page)
 
     cursor.execute(sql_query, params)
     country_teams = cursor.fetchall()
 
-    sql_query = """
+    sql_query = f"""
         SELECT COUNT(*)
         FROM teams t
         JOIN arenas a ON t.arena_id = a.arena_id
         JOIN cities c ON t.city_id = c.city_id
         JOIN states s ON c.state_id = s.state_id
         JOIN countries cout ON s.country_id = cout.country_id
-        WHERE cout.country_id = ?
+        {query_to_sql(query)}
     """
 
-    cursor.execute(sql_query, (query,))
+    cursor.execute(sql_query)
     total_count = cursor.fetchone()[0]
 
     return country_teams, total_count
@@ -489,3 +492,29 @@ def get_admin(username):
 
     conn.close()
     return admin_info
+
+
+def query_to_sql(query):
+    sql = "WHERE "
+    conditions = []
+
+    for key, value in query.items():
+        if isinstance(value, dict) and "constraints" in value:
+            operator = value.get("operator", "and").upper()
+            constraint_conditions = []
+
+            for constraint in value["constraints"]:
+                filterValue = constraint.get("value")
+                constraint_operator = constraint.get("operator")
+                if filterValue is not None and constraint_operator is not None:
+                    constraint_conditions.append(f"{key} {constraint_operator} {filterValue}")
+                    
+            if constraint_conditions:
+                conditions.append(f" ({f' {operator} '.join(constraint_conditions)}) ")
+
+    if conditions:
+        sql += " AND ".join(conditions)
+    else:
+        sql = sql.rstrip("WHERE ")
+
+    return sql

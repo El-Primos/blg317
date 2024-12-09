@@ -140,7 +140,9 @@ export default function AdminLogin() {
                         <span>Don't you have an account</span>
                         <img src="/mousydog.png" className="w-3rem" alt="mousydog" />
                         <span>,&nbsp;</span>
-                        <span className='link' onClick={goToSignUp}>Let's Sign</span>
+                        <span className="link" onClick={goToSignUp}>
+                            Let's Sign
+                        </span>
                         <img src="/coolface.png" className="w-3rem" alt="coolface" />
                     </div>
                 </div>
