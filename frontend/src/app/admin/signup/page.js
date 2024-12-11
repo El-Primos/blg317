@@ -20,6 +20,7 @@ export default function signup() {
 
     const validationSchema = Yup.object().shape({
         username: Yup.string().required("Username can't be empty."),
+        mail: Yup.string().email("Invalid email format").required("Mail can't be empty."),
         password: Yup.string().required("Password can't be empty."),
         confirmPassword: Yup.string().test('test-password', 'Passwords does not match.', function (value) {
             return value === formik.values.password;
@@ -29,12 +30,14 @@ export default function signup() {
     const formik = useFormik({
         initialValues: {
             username: '',
+            mail: '',
             password: '',
             confirmPassword: '',
         },
         validationSchema: validationSchema,
         enableReinitialize: true,
         onSubmit: (data) => {
+            console.log(data);
             handleSubmit(data);
         },
     });
@@ -55,14 +58,15 @@ export default function signup() {
     const handleSubmit = (formikData) => {
         fetch('/api/auth/signup', {
             method: 'POST',
-            body: JSON.stringify({ username: formikData.username, password: formikData.password }),
+            body: JSON.stringify({ username: formikData.username, mail: formikData.mail, password: formikData.password }),
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log("DATA in auth: ", data);
                 if (data.success) {
                     toast.current.show({
-                        severity: 'succes',
-                        summary: 'Succes',
+                        severity: 'success',
+                        summary: 'Success',
                         detail: 'Your account has been created successfully.',
                         life: 3000,
                     });
@@ -125,6 +129,19 @@ export default function signup() {
                                 onChange={formik.handleChange}
                             />
                             {getFormErrorMessage('username')}
+                        </div>
+                        <div className="mb-3">
+                            <span className="mx-2">Mail</span>
+                            <InputText
+                                id="mail"
+                                name="mail"
+                                value={formik.values.mail}
+                                className={classNames({
+                                    'p-invalid': isFormFieldValid('mail'),
+                                })}
+                                onChange={formik.handleChange}
+                            />
+                            {getFormErrorMessage('mail')}
                         </div>
                         <span className="mx-2">Password</span>
                         <div className="mb-3">

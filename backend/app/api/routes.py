@@ -265,11 +265,12 @@ def teamInfo_api(teamid):
 def admin_signup():
     try:
         data = request.get_json()
-        
-        if not data or 'username' not in data or 'password' not in data:
+        print("DATA: ", data)
+        if not data or 'username' not in data or 'password' not in data or 'mail' not in data:
             return jsonify({"error": "Missing username or password"}), 400
 
         username = data.get('username')
+        mail = data.get('mail')
         password = data.get('password')
 
         password_hash = hash_password(password)
@@ -277,9 +278,9 @@ def admin_signup():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO admins (username, password_hash, creation_date)
-            VALUES (?, ?, CURRENT_TIMESTAMP)
-        """, (username, password_hash))
+            INSERT INTO admins (username, mail, password_hash, creation_date)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        """, (username, mail, password_hash))
 
         conn.commit()
         conn.close()
