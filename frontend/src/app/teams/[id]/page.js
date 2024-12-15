@@ -121,7 +121,15 @@ export default function TeamInfo({ params }) {
                 <div className="col-12 lg:col-5">
                     {/* table */}
                     <div className="w-full text-center bg-primary-reverse font-semibold">Roster</div>
-                    <DataTable value={teamRoster} size="small" lazy stripedRows showGridlines>
+                    <DataTable 
+                        value={teamRoster}
+                        size="small" 
+                        lazy 
+                        stripedRows 
+                        showGridlines
+                        onRowClick={(rowData) => {
+                            router.push(`/players/${rowData.data.playerID}`); 
+                        }}>
                         <Column field="jerseyNumber" header="#"></Column>
                         <Column field="firstName" header="Name"></Column>
                         <Column field="lastName" header="Surname"></Column>
@@ -139,6 +147,9 @@ export default function TeamInfo({ params }) {
                         stripedRows
                         showGridlines
                         style={{ textAlign: 'center' }}
+                        onRowClick={(rowData) => {
+                            router.push(`/games/${rowData.data.game_id}`); 
+                        }}
                     >
                         <Column
                             field="date"
