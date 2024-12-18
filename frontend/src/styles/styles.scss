@@ -201,3 +201,31 @@
     padding: 0 2rem;
     overflow: auto;
 }
+
+.p-button.p-button-danger > .p-button,
+.delete-button-no {
+    color: #393d57 !important;
+    background-color: #d4d4d8 !important;
+    border-color: #d4d4d8 !important;
+}
+
+.p-button.p-button-danger.delete-button-no:enabled:focus {
+    box-shadow:
+        0 0 0 2px #ffffff,
+        0 0 0 4px #d4d4d8,
+        0 1px 2px 0 rgb(0 0 0 / 0%);
+}
+
+.p-button.p-button-danger > .p-button,
+.delete-button-yes {
+    color: white !important;
+    background-color: #ed5e68 !important;
+    border-color: #ed5e68 !important;
+}
+
+.p-button.p-button-danger.delete-button-yes:enabled:focus {
+    box-shadow:
+        0 0 0 2px #ffffff,
+        0 0 0 4px #ed5e68,
+        0 1px 2px 0 rgb(0 0 0 / 0%);
+}

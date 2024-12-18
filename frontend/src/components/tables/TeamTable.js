@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import TeamModal from '@/components/modals/TeamModal';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { FilterOperator, FilterMatchMode } from 'primereact/api';
+import { Toast } from 'primereact/toast';
 import lazyLoad from '@/lib/lazyLoadFilters';
 
 export default function TeamTable() {
+    const toast = useRef(null);
+
     const [currentPage, setCurrentPage] = useState(1);
     const [reportPage, setReportPage] = useState(1);
     const [firstIndex, setFirstIndex] = useState(0);
@@ -22,6 +26,10 @@ export default function TeamTable() {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalData, setModalData] = useState({});
     const [modalType, setModalType] = useState('');
+
+    const [deleteItemModalVisible, setDeleteItemModalVisible] = useState(false);
+    const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(true);
+    const [itemToDelete, setItemToDelete] = useState('');
 
     useEffect(() => {
         setData([]);
@@ -54,6 +62,10 @@ export default function TeamTable() {
                 constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
             },
             name: {
+                operator: FilterOperator.AND,
+                constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+            },
+            nickname: {
                 operator: FilterOperator.AND,
                 constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
             },
@@ -93,6 +105,11 @@ export default function TeamTable() {
                 type: 'Integer',
             },
             name: {
+                operator: FilterOperator.AND,
+                constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+                type: 'String',
+            },
+            nickname: {
                 operator: FilterOperator.AND,
                 constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
                 type: 'String',
@@ -137,6 +154,21 @@ export default function TeamTable() {
 
     const clearFilter = () => {
         initFilters();
+    };
+
+    const deleteTeam = (team_id) => () => {
+        fetch(`http://127.0.0.1:5000/api/admin/teams/${team_id}`, { method: 'DELETE' })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success)
+                    toast.current.show({ severity: 'success', summary: 'Success', detail: data.message, life: 3000 });
+                else toast.current.show({ severity: 'error', summary: 'Error', detail: data.error, life: 3000 });
+            })
+            .catch((error) => console.log(error))
+            .finally(() => {
+                setDeleteButtonDisabled(true);
+                setDeleteItemModalVisible(false);
+            });
     };
 
     const renderHeader = () => {
@@ -279,10 +311,53 @@ export default function TeamTable() {
                         setModalVisible(true);
                     }}
                 ></span>
-                <span className="pi pi-trash mx-3" style={{ cursor: 'pointer' }}></span>
+                <span
+                    className="pi pi-trash mx-3"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                        setItemToDelete(options);
+                        setDeleteItemModalVisible(true);
+                    }}
+                ></span>
             </div>
         );
     };
+
+    const deleteItemDialogFooter = (
+        <Fragment>
+            <div className="flex justify-content-center">
+                <InputText
+                    type="text"
+                    onChange={(e) => {
+                        if (itemToDelete.name === e.target.value) setDeleteButtonDisabled(false);
+                        else setDeleteButtonDisabled(true);
+                    }}
+                    className="p-inputtext-lg p-d-block mb-5 col-10 text-center p-invalid"
+                    placeholder="Type item name to confirm delete"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !deleteButtonDisabled) {
+                            deleteTeam(itemToDelete.team_id);
+                        }
+                    }}
+                />
+            </div>
+            <div className="flex justify-content-center">
+                <Button
+                    label="No"
+                    icon="pi pi-times"
+                    className="p-button-danger delete-button-no w-3"
+                    onClick={() => setDeleteItemModalVisible(false)}
+                />
+                <Button
+                    label="Yes"
+                    disabled={deleteButtonDisabled}
+                    icon="pi pi-check"
+                    className="p-button-danger delete-button-yes w-3"
+                    onClick={deleteTeam(itemToDelete.team_id)}
+                />
+            </div>
+        </Fragment>
+    );
 
     const onPageInputKeyDown = (event, options) => {
         if (event.key === 'Enter') {
@@ -341,6 +416,7 @@ export default function TeamTable() {
             >
                 <Column field="team_id" filter dataType="numeric" header="#"></Column>
                 <Column field="name" filter header="Team Name"></Column>
+                <Column field="nickname" filter header="Nickname"></Column>
                 <Column field="abbreviation" filter header="Abrv"></Column>
                 <Column field="owner" filter header="Owner"></Column>
                 <Column field="general_manager" filter header="General Manager"></Column>
@@ -356,6 +432,25 @@ export default function TeamTable() {
                 setVisible={setModalVisible}
                 type={modalType}
             />
+            <Dialog
+                visible={deleteItemModalVisible}
+                style={{ width: '40rem' }}
+                modal
+                closable={false}
+                footer={deleteItemDialogFooter}
+                onHide={() => setDeleteItemModalVisible(false)}
+            >
+                <div className="flex align-items-center justify-content-center text-xl">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem', color: 'tomato' }} />
+                    {itemToDelete && (
+                        <span>
+                            {'To delete item, please type the name' + ' '}
+                            <b>{itemToDelete.name}</b>
+                        </span>
+                    )}
+                </div>
+            </Dialog>
+            <Toast ref={toast} />
         </div>
     );
 }

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.data_fetch import *
+from app.utils.data_update import *
 from app.utils.credential_utils import check_credentials, get_token, hash_password
 
 api_bp = Blueprint("api", __name__)
@@ -228,10 +229,6 @@ def countryTeams_api(country_id):
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
 
-    query = request.args.to_dict(flat=False)
-    query.pop("page")
-    query.pop("limit")
-
     query = request.get_json();
     query['cout.country_id'] = {
         "operator": "and",
@@ -338,19 +335,33 @@ def admin_teams():
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
 
-    query = request.args.to_dict(flat=False)
-    query.pop("page")
-    query.pop("limit")
-
     query = request.get_json();
 
     table, total_teams = get_adminTeams(query, page, limit)
 
     return jsonify({
-        'teams': [{'team_id': row[0], 'name': row[1], 'abbreviation': row[2], 'owner': row[3], 'general_manager': row[4], 'headcoach': row[5], 'city_name': row[6], 'city_id': row[7], 'arena_name': row[8], 'arena_id': row[9], 'year_founded': row[10], 'facebook': row[11], 'instagram': row[12], 'twitter': row[13], 'logo_url': row[14]} for row in table],
+        'teams': [{'team_id': row[0], 'name': row[1], 'nickname': row[2], 'abbreviation': row[3], 'owner': row[4], 'general_manager': row[5], 'headcoach': row[6], 'city_name': row[7], 'city_id': row[8], 'arena_name': row[9], 'arena_id': row[10], 'year_founded': row[11], 'facebook': row[12], 'instagram': row[13], 'twitter': row[14], 'logo_url': row[15]} for row in table],
         'page': page,
         'totalTeams': total_teams
     })
+
+@api_bp.route('/admin/teams/<int:team_id>', methods=['PUT', 'DELETE'])
+def admin_manageTeams(team_id):
+    if request.method == 'PUT':
+        data = request.get_json();
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        if team_id == 0:
+            add_team(data)
+            return jsonify({'success': True, 'message': 'Team added successfully'}), 201
+        else:
+            update_team(team_id, data)
+            return jsonify({'success': True, 'message': 'Team updated successfully'}), 200
+
+    elif request.method == 'DELETE':
+        delete_team(team_id)
+        return jsonify({'success': True, 'message': 'Team deleted successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

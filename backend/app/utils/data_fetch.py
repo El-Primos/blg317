@@ -522,7 +522,7 @@ def get_adminTeams(query, page=1, per_page=24):
         query['t.abbreviation'] = query.pop('abbreviation')
 
     sql_query = f"""
-        SELECT t.team_id, t.name, t.abbreviation, t.owner, t.general_manager, t.headcoach, c.name as city_name, c.city_id, a.name as arena_name, a.arena_id, t.year_founded, t.facebook, t.instagram, t.twitter, t.logo_url
+        SELECT t.team_id, t.name, t.nickname, t.abbreviation, t.owner, t.general_manager, t.headcoach, c.name as city_name, c.city_id, a.name as arena_name, a.arena_id, t.year_founded, t.facebook, t.instagram, t.twitter, t.logo_url
         FROM teams t
         JOIN arenas a ON t.arena_id = a.arena_id
         JOIN cities c ON t.city_id = c.city_id
