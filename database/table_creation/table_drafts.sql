@@ -1,32 +1,31 @@
-ATTACH DATABASE 'C:\Users\umut\Desktop\nba.sqlite' AS nba_original;
+ALTER TABLE drafts
+    RENAME TO drafts_v1;
 
 CREATE TABLE IF NOT EXISTS drafts (
     draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player_id INTEGER,
+    player_id INTEGER NOT NULL,
     team_id INTEGER,
     season INTEGER,
     overall_pick INTEGER,
     position VARCHAR,
 
-    FOREIGN KEY (player_id) REFERENCES players(player_id),
-    FOREIGN KEY (team_id) REFERENCES teams(team_id)
+    FOREIGN KEY(player_id) REFERENCES players(player_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY(team_id) REFERENCES teams(team_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 );
 
-INSERT INTO drafts (player_id, team_id, season, overall_pick, position)
+INSERT INTO drafts
 SELECT
-    dcs.player_id,
-    dh.team_id,
-    dh.season,
-    dh.overall_pick,
-    dcs.position
-
+    draft_id,
+    player_id,
+    team_id,
+    season,
+    overall_pick,
+    position
 FROM
-    nba_original.draft_history dh
-JOIN
-    nba_original.draft_combine_stats dcs ON dh.person_id = dcs.player_id
-JOIN
-    players p ON dcs.player_id = p.player_id
-JOIN
-    teams t ON dh.team_id = t.team_id;
+    drafts_v1;
 
-DETACH DATABASE nba_original;
+DROP TABLE drafts_v1;
