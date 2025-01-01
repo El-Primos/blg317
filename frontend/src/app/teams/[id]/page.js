@@ -162,7 +162,12 @@ export default function TeamInfo({ params }) {
                         <div className="w-full grid text-center mt-2">
                             <div className="col-4 bg-primary-reverse text-weight-semibold">Location</div>
                             <div className="col-7 col-offset-1 bg-primary-reverse">
-                                {teamInfo.city}, {teamInfo.state}
+                                <a 
+                                    href={`https://www.google.com/maps?q=${teamInfo.coordinateX},${teamInfo.coordinateY}`}
+                                    target="_blank"
+                                >
+                                    {teamInfo.city}, {teamInfo.state}
+                                </a>
                             </div>
                         </div>
                         <div className="w-full grid text-center mt-2">

@@ -401,6 +401,8 @@ def teamInfo_api(teamid):
                         "state": teamInfo[17],
                         "arenaName": teamInfo[18],
                         "arenaCapacity": teamInfo[19],
+                        "coordinateX" : teamInfo[15],
+                        "coordinateY" : teamInfo[16],
                     }
                 ],
                 "activeRoster": [
